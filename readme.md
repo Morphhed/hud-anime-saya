@@ -1,8 +1,8 @@
-\# 🏎️ ShiftLight - Assetto Corsa Custom HUD
+# Assetto Corsa Custom HUD
 
 
 
-!\[ShiftLight Preview](preview.png)
+![ShiftLight Preview](preview.png)
 
 
 
@@ -10,33 +10,33 @@ Mod HUD simpel buat Assetto Corsa yang bikin tampilan \*shift light\* dan speedo
 
 
 
-\---
+---
 
 
 
-\## Fitur 
+## Fitur 
 
 
 
-\* \*\*Shift Light Dinamis\*\*: Lampu RPM bakal berubah bertahap (hijau ➔ kuning ➔ merah ➔ kedip-kedip merah pas udah mau mentok).
+* **Shift Light Dinamis**: Lampu RPM bakal berubah bertahap (hijau ➔ kuning ➔ merah ➔ kedip-kedip merah pas udah mau mentok).
 
-\* \*\*Mode Mesin Limit (Cooked Light)\*\*: Keluar indikator `cooked.png` kalau kamu geber RPM kelewatan batas aman.
+* **Mode Mesin Limit (Cooked Light)**: Keluar indikator `cooked.png` kalau kamu geber RPM kelewatan batas aman.
 
-\* \*\*Efek Tabrakan Selang-Seling\*\*: Begitu mobil nabrak keras, gambarnya bakal ganti-gantian antara `collision.png` dan `pog.png` pas benturan.
+* **Efek Tabrakan Selang-Seling**: Begitu mobil nabrak keras, gambarnya bakal ganti-gantian antara `collision.png` dan `pog.png` pas benturan.
 
-\* \*\*Efek Getar Mesin (Engine Shake)\*\*: Layar HUD bakal ikut bergetar pas mesin digeber di atas 4000 RPM biar makin dapet sensasinya.
+* **Efek Getar Mesin (Engine Shake)**: Layar HUD bakal ikut bergetar pas mesin digeber di atas 4000 RPM biar makin dapet sensasinya.
 
-\* \*\*Speedometer Digital\*\*: Rata kanan rapi, dan bisa kamu ganti antara \*\*KM/H\*\* atau \*\*MPH\*\*.
+* **Speedometer Digital**: Rata kanan rapi, dan bisa kamu ganti antara **KM/H** atau **MPH**.
 
-\* \*\*Menu Pengaturan di Dalam Game\*\*: Bisa bebas matiin/nyalain fitur lewat jendela \*Settings\* pas lagi di dalam trek.
-
-
-
-\---
+* **Menu Pengaturan di Dalam Game**: Bisa bebas matiin/nyalain fitur lewat jendela *Settings* pas lagi di dalam trek.
 
 
 
-\## File \& Aset 
+---
+
+
+
+## File & Aset 
 
 
 
