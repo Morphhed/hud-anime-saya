@@ -49,6 +49,9 @@ originated dari **Anime Shift Light (Mori Calliope Shift Light)**.
    ```
 ![cara donlod](images/howto.png)
 
+3. **Enable mod**
+   di SETTINGS -> 'Assetto Corsa' -> python apps -> centang 'hud-anime-saya-main'
+
 ---
 
 ## File & Aset 
