@@ -45,7 +45,7 @@ originated dari **Anime Shift Light (Mori Calliope Shift Light)**.
 ![cara donlod](readme/file.png)
 
 2. **Drop / Extract Folder**:
-   Langsung masukkan (*drop*) folder hasil download ke dalam direktori aplikasi Assetto Corsa kamu:
+   Langsung masukkan (*drop*) folder hasil download ke direktori Assetto Corsa berikut:
    ```text
    assettocorsa/apps/python/
 
