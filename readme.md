@@ -34,6 +34,8 @@ originated dari **Anime Shift Light (Mori Calliope Shift Light)**.
 
 👉 [OverTake.gg - Anime Shift Light (Mori Calliope Shift Light)](https://www.overtake.gg/threads/anime-shift-light-mori-calliope-shift-light.295446/)
 
+![sos](readme/sauce.png)
+
 ---
 
 ## Cara donlod
@@ -52,42 +54,6 @@ originated dari **Anime Shift Light (Mori Calliope Shift Light)**.
 
 3. **Enable mod**
    di SETTINGS -> 'Assetto Corsa' -> python apps -> centang 'hud-anime-saya-main'
+![cara donlod](readme/seting.png)
 
----
-
-## File & Aset 
-
-```text
-
-ShiftLight/
-
-├── ShiftLight.py
-
-├── sim\_info.py
-
-├── third\_party/
-
-├── stdlib/
-
-├── stdlib64/
-
-└── images/
-
-&#x20;   ├── frame.png
-
-&#x20;   ├── green.png / green2.png
-
-&#x20;   ├── yellow.png / yellow2.png
-
-&#x20;   ├── red.png / blank.png
-
-&#x20;   ├── cooked.png
-
-&#x20;   ├── collision.png
-
-&#x20;   ├── pog.png
-
-&#x20;   ├── speed\_digits/ (angka 0-9)
-
-&#x20;   └── speed\_unit/ (kmh.png \& mph.png)
 
