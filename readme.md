@@ -1,7 +1,7 @@
 # Assetto Corsa Custom HUD
 
 
-![ShiftLight Preview](images/preview.png)
+![mod Preview](images/preview.png)
 
 
 ---
@@ -47,8 +47,7 @@ originated dari **Anime Shift Light (Mori Calliope Shift Light)**.
    assettocorsa/apps/python/
 
    ```
-  <br>
-  <img src="images/howto.png" height="32">
+![cara donlod](images/howto.png)
 
 ---
 
