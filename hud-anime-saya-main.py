@@ -26,7 +26,7 @@ from sim_info import info
 # -----------------------------------------------------
 
 # CRITICAL MATCH: Changed to exactly match your folder "ShiftLight"
-app_name = "ShiftLight"
+app_name = "hud-anime-saya-main"
 pngFolder = os.path.join(current_dir, "images") + "/"
 
 # Windows & UI Element Handles
