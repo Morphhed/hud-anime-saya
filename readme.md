@@ -1,7 +1,7 @@
 # Assetto Corsa Custom HUD
 
 
-![mod Preview](images/preview.png)
+![mod Preview](readme/preview.png)
 
 
 ---
@@ -36,10 +36,11 @@ originated dari **Anime Shift Light (Mori Calliope Shift Light)**.
 
 ---
 
-## 🚀 Cara donlod
+## Cara donlod
 
-1. **Dapetin Filenya**
+1. **Dapetin Filenya**:
    Code trs 'Download Zip'
+![cara donlod](readme/file.png)
 
 2. **Drop / Extract Folder**:
    Langsung masukkan (*drop*) folder hasil download ke dalam direktori aplikasi Assetto Corsa kamu:
@@ -47,7 +48,7 @@ originated dari **Anime Shift Light (Mori Calliope Shift Light)**.
    assettocorsa/apps/python/
 
    ```
-![cara donlod](images/howto.png)
+![cara donlod](readme/howto.png)
 
 3. **Enable mod**
    di SETTINGS -> 'Assetto Corsa' -> python apps -> centang 'hud-anime-saya-main'
