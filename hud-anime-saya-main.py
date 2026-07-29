@@ -299,7 +299,7 @@ def acMain(ac_version):
     # ----------------------------------------
     
     # Settings Window 
-    settingsWindow = ac.newApp("ShiftLight Settings")
+    settingsWindow = ac.newApp("settingan hud bos")
     ac.setSize(settingsWindow, 200, 200)
     ac.setPosition(settingsWindow, 760, 300)
     
