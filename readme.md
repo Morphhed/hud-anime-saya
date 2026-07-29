@@ -1,7 +1,7 @@
 # Assetto Corsa Custom HUD
 
 
-![ShiftLight Preview](preview.png)
+![ShiftLight Preview](images/preview.png)
 
 
 ---
@@ -9,18 +9,23 @@
 
 ## Fitur
 
-* **Shift Light Dinamis**: Lampu RPM bakal berubah bertahap dari `green.png` & `green2.png` ➔ `yellow.png` & `yellow2.png` ➔ `red.png` (serta kedip-kedip selang-seling dengan `blank.png` pas RPM sudah mau mentok).
+* **Shift Light Dinamis**: Lampu RPM bakal berubah bertahap seiring naiknya RPM mesin.
+  <br>
+  <img src="images/green.png" height="32"> <img src="images/green2.png" height="32"> ➔ <img src="images/yellow.png" height="32"> <img src="images/yellow2.png" height="32"> ➔ <img src="images/red.png" height="32"> <img src="images/blank.png" height="32">
 
-* **Mode Mesin Limit (Cooked Light)**: Keluar indikator `cooked.png` kalau kamu geber RPM kelewatan batas aman.
+* **Mode Mesin Limit (Cooked Light)**: Keluar indikator khusus saat geber RPM melampaui batas aman.
+  <br>
+  <img src="images/cooked.png" height="32">
 
-* **Efek Tabrakan Selang-Seling**: Begitu mobil nabrak keras, gambarnya bakal ganti-gantian antara `collision.png` dan `pog.png` tiap kali terjadi benturan baru.
+* **Efek Tabrakan Selang-Seling**: Gambarnya bakal ganti-gantian secara dinamis tiap kali terjadi benturan baru.
+  <br>
+  <img src="images/collision.png" height="32"> &nbsp; ↔ &nbsp; <img src="images/pog.png" height="32">
 
-* **Efek Getar Mesin (Engine Shake)**: Layar HUD bakal ikut bergetar pas mesin digeber di atas 4000 RPM biar makin dapet sensasinya.
+* **Efek Getar Mesin (Engine Shake)**: Layar HUD bakal ikut bergetar pas mesin digeber di atas 4000 RPM biar makin terasa sensasinya.
 
-* **Speedometer Digital**: Rata kanan rapi, dan bisa kamu ganti antara **KM/H** atau **MPH**.
+* **Speedometer Digital**: Tampilan angka rata kanan yang rapi, dan satuan kecepatan bisa diganti antara **KM/H** atau **MPH**.
 
 * **Menu Pengaturan di Dalam Game**: Bisa bebas matiin/nyalain fitur lewat jendela *Settings* pas lagi di dalam trek.
-
 ---
 
 
