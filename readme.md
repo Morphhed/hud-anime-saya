@@ -28,6 +28,13 @@
 * **Menu Pengaturan di Dalam Game**: Bisa bebas matiin/nyalain fitur lewat jendela *Settings* pas lagi di dalam trek.
 ---
 
+## Credit & Mod Original
+
+originated dari **Anime Shift Light (Mori Calliope Shift Light)**.
+
+👉 [OverTake.gg - Anime Shift Light (Mori Calliope Shift Light)](https://www.overtake.gg/threads/anime-shift-light-mori-calliope-shift-light.295446/)
+
+---
 
 ## File & Aset 
 
