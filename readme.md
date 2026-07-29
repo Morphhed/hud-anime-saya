@@ -1,4 +1,4 @@
-# Assetto Corsa Custom HUD
+# Assetto Corsa Custom HUD + 'sentuhan pribadi'
 
 
 ![mod Preview](readme/preview.png)
