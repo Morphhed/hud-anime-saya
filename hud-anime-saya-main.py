@@ -25,7 +25,7 @@ os.environ['PATH'] = os.environ['PATH'] + ';.'
 from sim_info import info
 # -----------------------------------------------------
 
-# CRITICAL MATCH: Changed to exactly match your folder "ShiftLight"
+# CRITICAL MATCH: Changed to exactly match your folder "hud-anime-saya-main"
 app_name = "hud-anime-saya-main"
 pngFolder = os.path.join(current_dir, "images") + "/"
 
@@ -61,7 +61,8 @@ speedo_enabled = 0       # Visibility toggle (1 = Show / 0 = Hide)
 # ----------------------------------------------------------
 
 # Settings Toggle (1 = On / 0 = Off)
-cooked_enabled = 1 
+cooked_enabled = 1
+stop_enabled = 1 
 
 # Splash & Fading Logic
 tex_splash = -1
@@ -79,7 +80,10 @@ FADE_OUT_SPEED = 1.5
 
 # Texture Handles
 tex_active = -1
-tex_frame = -1     
+tex_frame = -1
+tex_stop = -1
+show_stop = False
+stop_opacity = 0.0     
 last_loaded_path = ""
 speed_digits = []       
 tex_kmh = -1            
@@ -106,10 +110,15 @@ def on_speedo_toggle(name, value):
     global speedo_enabled
     speedo_enabled = value
 
+def on_stop_toggle(name, value):
+    global stop_enabled
+    stop_enabled = value
+
 def onFormRender(deltaT):
     global tex_active, tex_frame, tex_splash, shake_enabled, MAX_RPM, offset_x, offset_y, splash_opacity
     global speed_list, speed_digits, speed_x, speed_y, speed_width, speed_height, speed_gap
     global tex_kmh, tex_mph, unit_kmh, unit_width, unit_height, unit_y_offset, speedo_enabled
+    global tex_stop, show_stop, stop_opacity
     
     ac.glColor4f(1, 1, 1, 1)
     rpm = ac.getCarState(0, acsys.CS.RPM)
@@ -143,6 +152,18 @@ def onFormRender(deltaT):
         ac.ext_glVertexTex(((offset_x + 320) + cx), (offset_y + cy), 1, 0)
         ac.glEnd()
         ac.glColor4f(1, 1, 1, 1)
+
+    # --- 2.5 STOP SIGN OVERLAY (BRAKE INPUT) ---
+    if tex_stop != -1 and stop_opacity > 0:
+        ac.glColor4f(1, 1, 1, stop_opacity)
+        ac.ext_glSetTexture(tex_stop)
+        ac.glBegin(acsys.GL.Quads)
+        ac.ext_glVertexTex((offset_x + cx), (offset_y + cy), 0, 0)
+        ac.ext_glVertexTex((offset_x + cx), ((offset_y + 120) + cy), 0, 1)
+        ac.ext_glVertexTex(((offset_x + 320) + cx), ((offset_y + 120) + cy), 1, 1)
+        ac.ext_glVertexTex(((offset_x + 320) + cx), (offset_y + cy), 1, 0)
+        ac.glEnd()
+        ac.glColor4f(1, 1, 1, 1) # Reset color back to solid for the frame
 
     # --- 3. FRAME (TOP) ---
     if tex_frame != -1:
@@ -197,13 +218,24 @@ def acUpdate(deltaT):
     global show_splash, hide_timer, collision_delay, splash_opacity, splash_enabled, tex_splash
     global cooked_enabled, speed_list, unit_kmh
     global was_colliding, splash_toggle, tex_collision, tex_pog_splash
+    global show_stop, stop_enabled, stop_opacity
 
     if not MAX_RPM_INITIALIZED:
         if info.static.maxRpm > 0:
             MAX_RPM = info.static.maxRpm
             MAX_RPM_INITIALIZED = True
         else: return
+ 
+# --- BRAKE DETECTION LOGIC ---
+    brake_input = ac.getCarState(0, acsys.CS.Brake)
+    show_stop = (brake_input > 0.05 and stop_enabled == 1)
 
+    if show_stop:
+        stop_opacity = min(1.0, stop_opacity + (FADE_IN_SPEED * deltaT))
+    else:
+        stop_opacity = max(0.0, stop_opacity - (FADE_OUT_SPEED * deltaT))
+
+    
     raw_lat, vert_g, raw_lon = ac.getCarState(0, acsys.CS.AccG)
     g_mag = math.sqrt(raw_lat**2 + raw_lon**2)
     
@@ -277,7 +309,7 @@ def acUpdate(deltaT):
 
 def acMain(ac_version):
     global appWindow, settingsWindow, tex_frame, tex_splash, speed_digits, tex_kmh, tex_mph
-    global speedo_enabled, tex_collision, tex_pog_splash
+    global speedo_enabled, tex_collision, tex_pog_splash, tex_stop, stop_enabled
     
     appWindow = ac.newApp(app_name)
     ac.setSize(appWindow, 340, 140)
@@ -300,7 +332,7 @@ def acMain(ac_version):
     
     # Settings Window 
     settingsWindow = ac.newApp("settingan hud bos")
-    ac.setSize(settingsWindow, 200, 200)
+    ac.setSize(settingsWindow, 200, 220)
     ac.setPosition(settingsWindow, 760, 300)
     
     shake_check = ac.addCheckBox(settingsWindow, "Enable Shake")
@@ -332,12 +364,19 @@ def acMain(ac_version):
     ac.setSize(speedo_check, 15, 15)
     ac.setValue(speedo_check, 1 if speedo_enabled == 1 else 0)
     ac.addOnCheckBoxChanged(speedo_check, on_speedo_toggle)
+
+    stop_check = ac.addCheckBox(settingsWindow, "Enable Brake Overlay")
+    ac.setPosition(stop_check, 10, 185)
+    ac.setSize(stop_check, 15, 15)
+    ac.setValue(stop_check, 1 if stop_enabled == 1 else 0)
+    ac.addOnCheckBoxChanged(stop_check, on_stop_toggle)
     
     tex_frame = ac.newTexture(pngFolder + "frame.png")
     
     # Load both collision textures
     tex_collision = ac.newTexture(pngFolder + "collision.png")
     tex_pog_splash = ac.newTexture(pngFolder + "pog.png")
+    tex_stop = ac.newTexture(pngFolder + "stop.png")
     tex_splash = tex_collision
     
     ac.addRenderCallback(appWindow, onFormRender)
