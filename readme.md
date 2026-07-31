@@ -25,6 +25,10 @@
   <br>
   <img src="images/stop.png" height="32">
 
+* **Indikator Pit Limiter**: sesuai nama.
+  <br>
+  <img src="images/limit.png" height="32">
+
 * **Speedometer Digital**: mati by default, idupin sendiri
 
 * **Menu Pengaturan di Dalam Game**: setting.
