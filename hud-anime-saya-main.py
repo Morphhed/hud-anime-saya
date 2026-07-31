@@ -79,6 +79,10 @@ FADE_IN_SPEED = 10.0
 FADE_OUT_SPEED = 1.5
 
 # Texture Handles
+pit_enabled = 1          
+tex_pit = -1             
+show_pit = False         
+pit_opacity = 0.0        
 tex_active = -1
 tex_frame = -1
 tex_stop = -1
@@ -114,11 +118,16 @@ def on_stop_toggle(name, value):
     global stop_enabled
     stop_enabled = value
 
+def on_pit_toggle(name, value):
+    global pit_enabled
+    pit_enabled = value
+
 def onFormRender(deltaT):
     global tex_active, tex_frame, tex_splash, shake_enabled, MAX_RPM, offset_x, offset_y, splash_opacity
     global speed_list, speed_digits, speed_x, speed_y, speed_width, speed_height, speed_gap
     global tex_kmh, tex_mph, unit_kmh, unit_width, unit_height, unit_y_offset, speedo_enabled
     global tex_stop, show_stop, stop_opacity
+    global tex_pit, show_pit, pit_opacity
     
     ac.glColor4f(1, 1, 1, 1)
     rpm = ac.getCarState(0, acsys.CS.RPM)
@@ -163,7 +172,19 @@ def onFormRender(deltaT):
         ac.ext_glVertexTex(((offset_x + 320) + cx), ((offset_y + 120) + cy), 1, 1)
         ac.ext_glVertexTex(((offset_x + 320) + cx), (offset_y + cy), 1, 0)
         ac.glEnd()
-        ac.glColor4f(1, 1, 1, 1) # Reset color back to solid for the frame
+        ac.glColor4f(1, 1, 1, 1) 
+
+    # --- 2.6 PIT LIMITER OVERLAY ---
+    if tex_pit != -1 and pit_opacity > 0:
+        ac.glColor4f(1, 1, 1, pit_opacity)
+        ac.ext_glSetTexture(tex_pit)
+        ac.glBegin(acsys.GL.Quads)
+        ac.ext_glVertexTex((offset_x + cx), (offset_y + cy), 0, 0)
+        ac.ext_glVertexTex((offset_x + cx), ((offset_y + 120) + cy), 0, 1)
+        ac.ext_glVertexTex(((offset_x + 320) + cx), ((offset_y + 120) + cy), 1, 1)
+        ac.ext_glVertexTex(((offset_x + 320) + cx), (offset_y + cy), 1, 0)
+        ac.glEnd()
+        ac.glColor4f(1, 1, 1, 1) 
 
     # --- 3. FRAME (TOP) ---
     if tex_frame != -1:
@@ -219,6 +240,7 @@ def acUpdate(deltaT):
     global cooked_enabled, speed_list, unit_kmh
     global was_colliding, splash_toggle, tex_collision, tex_pog_splash
     global show_stop, stop_enabled, stop_opacity
+    global show_pit, pit_enabled, pit_opacity
 
     if not MAX_RPM_INITIALIZED:
         if info.static.maxRpm > 0:
@@ -234,6 +256,17 @@ def acUpdate(deltaT):
         stop_opacity = min(1.0, stop_opacity + (FADE_IN_SPEED * deltaT))
     else:
         stop_opacity = max(0.0, stop_opacity - (FADE_OUT_SPEED * deltaT))
+
+# --- PIT LIMITER DETECTION LOGIC (FIXED) ---
+    # Retrieve pit limiter status from sim_info instead of acsys.CS
+    pit_input = info.physics.pitLimiterOn
+    show_pit = (pit_input == 1 and pit_enabled == 1)
+
+    # Pit fade math
+    if show_pit:
+        pit_opacity = min(1.0, pit_opacity + (FADE_IN_SPEED * deltaT))
+    else:
+        pit_opacity = max(0.0, pit_opacity - (FADE_OUT_SPEED * deltaT))
 
     
     raw_lat, vert_g, raw_lon = ac.getCarState(0, acsys.CS.AccG)
@@ -310,6 +343,7 @@ def acUpdate(deltaT):
 def acMain(ac_version):
     global appWindow, settingsWindow, tex_frame, tex_splash, speed_digits, tex_kmh, tex_mph
     global speedo_enabled, tex_collision, tex_pog_splash, tex_stop, stop_enabled
+    global tex_pit, pit_enabled
     
     appWindow = ac.newApp(app_name)
     ac.setSize(appWindow, 340, 140)
@@ -332,7 +366,7 @@ def acMain(ac_version):
     
     # Settings Window 
     settingsWindow = ac.newApp("settingan hud bos")
-    ac.setSize(settingsWindow, 200, 220)
+    ac.setSize(settingsWindow, 200, 250)
     ac.setPosition(settingsWindow, 760, 300)
     
     shake_check = ac.addCheckBox(settingsWindow, "Enable Shake")
@@ -370,13 +404,20 @@ def acMain(ac_version):
     ac.setSize(stop_check, 15, 15)
     ac.setValue(stop_check, 1 if stop_enabled == 1 else 0)
     ac.addOnCheckBoxChanged(stop_check, on_stop_toggle)
+
+    pit_check = ac.addCheckBox(settingsWindow, "Enable Pit Limit")
+    ac.setPosition(pit_check, 10, 215)
+    ac.setSize(pit_check, 15, 15)
+    ac.setValue(pit_check, 1 if pit_enabled == 1 else 0)
+    ac.addOnCheckBoxChanged(pit_check, on_pit_toggle)
     
     tex_frame = ac.newTexture(pngFolder + "frame.png")
     
-    # Load both collision textures
+    # Load textures
     tex_collision = ac.newTexture(pngFolder + "collision.png")
     tex_pog_splash = ac.newTexture(pngFolder + "pog.png")
     tex_stop = ac.newTexture(pngFolder + "stop.png")
+    tex_pit = ac.newTexture(pngFolder + "limit.png")  
     tex_splash = tex_collision
     
     ac.addRenderCallback(appWindow, onFormRender)
