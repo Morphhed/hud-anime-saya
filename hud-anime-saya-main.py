@@ -25,7 +25,6 @@ os.environ['PATH'] = os.environ['PATH'] + ';.'
 from sim_info import info
 # -----------------------------------------------------
 
-# CRITICAL MATCH: Changed to exactly match your folder "hud-anime-saya-main"
 app_name = "hud-anime-saya-main"
 pngFolder = os.path.join(current_dir, "images") + "/"
 
@@ -33,34 +32,34 @@ pngFolder = os.path.join(current_dir, "images") + "/"
 appWindow = 0
 settingsWindow = 0
 
-# Physics & Logic
+# Physics & Telemetry Cache
 current_state = -1 
 timer = 0 
 flash_toggle = True
 MAX_RPM = 0
 MAX_RPM_INITIALIZED = False
+current_rpm = 0
 shake_enabled = 1  
 offset_x = 10  
 offset_y = 10  
 
-# --- FIXED RIGHT-ANCHORED SPEEDOMETER LOGIC PROPERTIES ---
+# --- RIGHT-ANCHORED SPEEDOMETER LOGIC ---
 speed_list = []          
-speed_x = 240            # Fixed horizontal anchor for the unit text (KM/H or MPH)
-speed_y = 85             # Anchor Y position for centering vertically
-speed_width = 22         # Width of individual numbers
-speed_height = 34        # Height of individual numbers
+speed_x = 240            # Fixed horizontal anchor
+speed_y = 85             # Vertical anchor
+speed_width = 22         # Digit width
+speed_height = 34        # Digit height
 speed_gap = 2            # Space between numbers
 
-unit_width = 26          # Width of the unit texture
-unit_height = 12         # Height of the unit texture
-unit_y_offset = 18       # Drops the unit text lower down to align with digit bottoms
+unit_width = 26          
+unit_height = 12         
+unit_y_offset = 18       
 
-# Interchangeable metric toggle state (True = KM/H, False = MPH)
 unit_kmh = True
-speedo_enabled = 0       # Visibility toggle (1 = Show / 0 = Hide)
-# ----------------------------------------------------------
+speedo_enabled = 0       
+# ------------------------------------------
 
-# Settings Toggle (1 = On / 0 = Off)
+# Settings Toggles
 cooked_enabled = 1
 stop_enabled = 1 
 
@@ -78,17 +77,27 @@ splash_enabled = 1
 FADE_IN_SPEED = 10.0  
 FADE_OUT_SPEED = 1.5
 
-# Texture Handles
+# Texture Cache Handles
 pit_enabled = 1          
 tex_pit = -1             
 show_pit = False         
 pit_opacity = 0.0        
+
 tex_active = -1
+shift_textures = {}
+SHIFT_MAPPING = {
+    0: "green.png", 
+    1: "green2.png", 
+    2: "yellow.png", 
+    3: "yellow2.png", 
+    4: "red.png", 
+    6: "cooked.png"
+}
+
 tex_frame = -1
 tex_stop = -1
 show_stop = False
 stop_opacity = 0.0     
-last_loaded_path = ""
 speed_digits = []       
 tex_kmh = -1            
 tex_mph = -1            
@@ -127,18 +136,16 @@ def onFormRender(deltaT):
     global speed_list, speed_digits, speed_x, speed_y, speed_width, speed_height, speed_gap
     global tex_kmh, tex_mph, unit_kmh, unit_width, unit_height, unit_y_offset, speedo_enabled
     global tex_stop, show_stop, stop_opacity
-    global tex_pit, show_pit, pit_opacity
+    global tex_pit, show_pit, pit_opacity, current_rpm
     
     ac.glColor4f(1, 1, 1, 1)
-    rpm = ac.getCarState(0, acsys.CS.RPM)
     
     cx, cy = 0, 0
-    if shake_enabled == 1:
-        if rpm > 4000 and MAX_RPM > 4000:
-            rel_rpm = max(0, min(1, (rpm - 4000) / (MAX_RPM - 4000)))
-            amplitude = (rel_rpm ** 3) * 6.0
-            cx = random.uniform(-amplitude, amplitude)
-            cy = random.uniform(-amplitude, amplitude)
+    if shake_enabled == 1 and current_rpm > 4000 and MAX_RPM > 4000:
+        rel_rpm = max(0.0, min(1.0, (current_rpm - 4000) / (MAX_RPM - 4000)))
+        amplitude = (rel_rpm ** 3) * 6.0
+        cx = random.uniform(-amplitude, amplitude)
+        cy = random.uniform(-amplitude, amplitude)
 
     # --- 1. LIGHTS (BOTTOM) ---
     if tex_active != -1:
@@ -162,7 +169,7 @@ def onFormRender(deltaT):
         ac.glEnd()
         ac.glColor4f(1, 1, 1, 1)
 
-    # --- 2.5 STOP SIGN OVERLAY (BRAKE INPUT) ---
+    # --- 2.5 STOP SIGN OVERLAY ---
     if tex_stop != -1 and stop_opacity > 0:
         ac.glColor4f(1, 1, 1, stop_opacity)
         ac.ext_glSetTexture(tex_stop)
@@ -200,7 +207,7 @@ def onFormRender(deltaT):
     if speedo_enabled == 1:
         ac.glColor4f(1, 1, 1, 1)
         
-        # Render Unit Text first at fixed anchor position
+        # Unit Text Anchor
         active_unit_tex = tex_kmh if unit_kmh else tex_mph
         if active_unit_tex != -1:
             u_x1 = speed_x
@@ -216,9 +223,9 @@ def onFormRender(deltaT):
             ac.ext_glVertexTex(u_x2, u_y1, 1, 0)
             ac.glEnd()
 
-        # Render digital segments moving backwards to the left
-        for i in range(len(speed_list)):
-            digit_value = int((speed_list[::-1])[i])
+        # Render digital segments right-to-left
+        for i, char in enumerate(reversed(speed_list)):
+            digit_value = int(char)
             
             x2 = speed_x - speed_gap - (i * (speed_width + speed_gap))
             x1 = x2 - speed_width
@@ -234,8 +241,8 @@ def onFormRender(deltaT):
             ac.glEnd()
 
 def acUpdate(deltaT):
-    global current_state, timer, flash_toggle, tex_active, last_loaded_path
-    global MAX_RPM, MAX_RPM_INITIALIZED
+    global current_state, timer, flash_toggle, tex_active
+    global MAX_RPM, MAX_RPM_INITIALIZED, current_rpm
     global show_splash, hide_timer, collision_delay, splash_opacity, splash_enabled, tex_splash
     global cooked_enabled, speed_list, unit_kmh
     global was_colliding, splash_toggle, tex_collision, tex_pog_splash
@@ -246,47 +253,41 @@ def acUpdate(deltaT):
         if info.static.maxRpm > 0:
             MAX_RPM = info.static.maxRpm
             MAX_RPM_INITIALIZED = True
-        else: return
+        else: 
+            return
+
+    # Cache Telemetry
+    current_rpm = ac.getCarState(0, acsys.CS.RPM)
  
-# --- BRAKE DETECTION LOGIC ---
+    # --- BRAKE DETECTION ---
     brake_input = ac.getCarState(0, acsys.CS.Brake)
     show_stop = (brake_input > 0.05 and stop_enabled == 1)
-
     if show_stop:
         stop_opacity = min(1.0, stop_opacity + (FADE_IN_SPEED * deltaT))
     else:
         stop_opacity = max(0.0, stop_opacity - (FADE_OUT_SPEED * deltaT))
 
-# --- PIT LIMITER DETECTION LOGIC (FIXED) ---
-    # Retrieve pit limiter status from sim_info instead of acsys.CS
-    pit_input = info.physics.pitLimiterOn
-    show_pit = (pit_input == 1 and pit_enabled == 1)
-
-    # Pit fade math
+    # --- PIT LIMITER DETECTION ---
+    show_pit = (info.physics.pitLimiterOn == 1 and pit_enabled == 1)
     if show_pit:
         pit_opacity = min(1.0, pit_opacity + (FADE_IN_SPEED * deltaT))
     else:
         pit_opacity = max(0.0, pit_opacity - (FADE_OUT_SPEED * deltaT))
 
-    
+    # --- G-FORCE / COLLISION DETECTION ---
     raw_lat, vert_g, raw_lon = ac.getCarState(0, acsys.CS.AccG)
     g_mag = math.sqrt(raw_lat**2 + raw_lon**2)
     
     if g_mag > 2.0 and splash_enabled == 1:
         if not was_colliding:
             was_colliding = True
-            # Swap splash image on each NEW hit
-            if splash_toggle == 0:
-                tex_splash = tex_collision
-                splash_toggle = 1
-            else:
-                tex_splash = tex_pog_splash
-                splash_toggle = 0
+            tex_splash = tex_collision if splash_toggle == 0 else tex_pog_splash
+            splash_toggle = 1 - splash_toggle
                 
         collision_delay = 0.1 
         hide_timer = 0.4 
     elif g_mag <= 1.5:
-        was_colliding = False # Reset hit trigger when G-force drops
+        was_colliding = False
     
     if collision_delay > 0:
         collision_delay -= deltaT
@@ -302,16 +303,12 @@ def acUpdate(deltaT):
     else:
         splash_opacity = max(0.0, splash_opacity - (FADE_OUT_SPEED * deltaT))
 
-    if unit_kmh:
-        speed = ac.getCarState(0, acsys.CS.SpeedKMH)
-    else:
-        speed = ac.getCarState(0, acsys.CS.SpeedMPH)
-        
+    # --- SPEEDOMETER DATA ---
+    speed = ac.getCarState(0, acsys.CS.SpeedKMH if unit_kmh else acsys.CS.SpeedMPH)
     speed_list = list("{0:.0f}".format(speed))
 
-    # Calculate status mappings
-    rpm = ac.getCarState(0, acsys.CS.RPM)
-    rpmPercent = rpm / MAX_RPM if MAX_RPM > 0 else 0
+    # --- SHIFT LIGHT STATE MAPPING ---
+    rpmPercent = current_rpm / MAX_RPM if MAX_RPM > 0 else 0
 
     if rpmPercent > 1.01:
         new_state = 6 if cooked_enabled == 1 else 5 
@@ -322,10 +319,6 @@ def acUpdate(deltaT):
     elif rpmPercent > 0.50: new_state = 1           
     else: new_state = 0                             
 
-    mapping = {0: "green.png", 1: "green2.png", 2: "yellow.png", 
-               3: "yellow2.png", 4: "red.png", 6: "cooked.png"}
-    
-    img_file = ""
     if new_state == 5:
         timer += deltaT
         if timer > 0.05:
@@ -333,38 +326,44 @@ def acUpdate(deltaT):
             timer = 0
         img_file = "red.png" if flash_toggle else "blank.png"
     else:
-        img_file = mapping.get(new_state, "green.png")
+        img_file = SHIFT_MAPPING.get(new_state, "green.png")
 
-    new_path = pngFolder + img_file
-    if new_path != last_loaded_path:
-        tex_active = ac.newTexture(new_path)
-        last_loaded_path = new_path
+    # Fast lookup from pre-loaded textures
+    tex_active = shift_textures.get(img_file, -1)
 
 def acMain(ac_version):
     global appWindow, settingsWindow, tex_frame, tex_splash, speed_digits, tex_kmh, tex_mph
     global speedo_enabled, tex_collision, tex_pog_splash, tex_stop, stop_enabled
-    global tex_pit, pit_enabled
+    global tex_pit, pit_enabled, shift_textures
     
     appWindow = ac.newApp(app_name)
     ac.setSize(appWindow, 340, 140)
-    
-    # FORCED VISIBILITY LAYER: Giving it a name and standard gray borders temporarily
     ac.setTitle(appWindow, "")
     ac.drawBorder(appWindow, 0)
     ac.setBackgroundOpacity(appWindow, 0)
     
-    # Load textures for digits 0 through 9
+    # Pre-load digit textures 0-9
     speed_digits = []
     for i in range(10):
         digit_path = pngFolder + "speed_digits/speed_digits_" + str(i) + ".png"
         speed_digits.append(ac.newTexture(digit_path))
         
-    # --- LOAD INTERCHANGEABLE UNIT IMAGES ---
+    # Pre-load speed units
     tex_kmh = ac.newTexture(pngFolder + "speed_unit/kmh.png")
     tex_mph = ac.newTexture(pngFolder + "speed_unit/mph.png")
-    # ----------------------------------------
     
-    # Settings Window 
+    # Pre-load all shift light textures once
+    shift_textures = {
+        "green.png": ac.newTexture(pngFolder + "green.png"),
+        "green2.png": ac.newTexture(pngFolder + "green2.png"),
+        "yellow.png": ac.newTexture(pngFolder + "yellow.png"),
+        "yellow2.png": ac.newTexture(pngFolder + "yellow2.png"),
+        "red.png": ac.newTexture(pngFolder + "red.png"),
+        "cooked.png": ac.newTexture(pngFolder + "cooked.png"),
+        "blank.png": ac.newTexture(pngFolder + "blank.png")
+    }
+    
+    # Settings Window
     settingsWindow = ac.newApp("settingan hud bos")
     ac.setSize(settingsWindow, 200, 250)
     ac.setPosition(settingsWindow, 760, 300)
@@ -412,8 +411,6 @@ def acMain(ac_version):
     ac.addOnCheckBoxChanged(pit_check, on_pit_toggle)
     
     tex_frame = ac.newTexture(pngFolder + "frame.png")
-    
-    # Load textures
     tex_collision = ac.newTexture(pngFolder + "collision.png")
     tex_pog_splash = ac.newTexture(pngFolder + "pog.png")
     tex_stop = ac.newTexture(pngFolder + "stop.png")
